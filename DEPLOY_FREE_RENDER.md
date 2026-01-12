@@ -51,6 +51,7 @@ Render.com offers a completely FREE tier perfect for development and low-traffic
 #### 3.1 Ensure All Files are Present
 
 Check these files exist in your project:
+
 - ✅ `Procfile`
 - ✅ `runtime.txt`
 - ✅ `requirements.txt`
@@ -92,6 +93,7 @@ git push -u origin main
 Fill in these settings:
 
 **Basic Settings:**
+
 - **Name**: `sustainable-shine-api` (or your choice)
 - **Region**: Same as your database (e.g., Singapore)
 - **Branch**: `main`
@@ -99,10 +101,12 @@ Fill in these settings:
 - **Runtime**: `Python 3`
 
 **Build & Deploy:**
+
 - **Build Command**: `pip install -r requirements.txt`
 - **Start Command**: `gunicorn core.wsgi:application`
 
 **Plan:**
+
 - Select **FREE** ⭐
 
 Click "**Advanced**" to add environment variables
@@ -116,22 +120,28 @@ Click "**Add Environment Variable**" and add these:
 #### Required Variables:
 
 1. **SECRET_KEY**
+
    - Value: Generate a new one using:
+
    ```bash
    python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
    ```
 
 2. **DEBUG**
+
    - Value: `False`
 
 3. **DJANGO_SETTINGS_MODULE**
+
    - Value: `core.production_settings`
 
 4. **DATABASE_URL**
+
    - Value: (Paste the Internal Database URL from Step 2)
    - Example: `postgresql://user:pass@dpg-xxxxx-a.singapore-postgres.render.com/dbname`
 
 5. **ALLOWED_HOSTS**
+
    - Value: `sustainable-shine-api.onrender.com,api.sustainableshine.com.au`
    - (Replace `sustainable-shine-api` with your actual service name)
 
@@ -185,9 +195,11 @@ python manage.py collectstatic --noinput
 ### Step 8: Test Your API
 
 Your API is now available at:
+
 - **https://sustainable-shine-api.onrender.com** (replace with your service name)
 
 Test endpoints:
+
 ```bash
 # Test bookings API
 curl https://sustainable-shine-api.onrender.com/api/bookings/
@@ -228,6 +240,7 @@ curl https://sustainable-shine-api.onrender.com/api/blog/
 ### 9.3 Update Environment Variables
 
 After DNS is configured, update in Render:
+
 - **ALLOWED_HOSTS**: `api.sustainableshine.com.au,sustainable-shine-api.onrender.com`
 
 ---
@@ -237,15 +250,18 @@ After DNS is configured, update in Render:
 ### 10.1 Environment Variables
 
 **Development (.env.local):**
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
 ```
 
 **Production (.env.production):**
+
 ```env
 NEXT_PUBLIC_API_URL=https://api.sustainableshine.com.au/api
 ```
-*Or use: `https://sustainable-shine-api.onrender.com/api` if not using custom domain*
+
+_Or use: `https://sustainable-shine-api.onrender.com/api` if not using custom domain_
 
 ### 10.2 Update Code
 
@@ -253,13 +269,13 @@ In your Next.js components, update API calls:
 
 ```javascript
 // BookingCalculator.jsx
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 // Update fetch calls
 const response = await fetch(`${API_URL}/bookings/`, {
-  method: 'POST',
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   body: JSON.stringify(bookingData),
 });
@@ -272,6 +288,7 @@ Apply this to all API calls in your frontend.
 ## ⚡ About the Spin-Down Feature
 
 ### What Happens:
+
 - After 15 minutes of no requests, Render puts your app to "sleep"
 - First request after sleep takes ~30 seconds to wake up
 - Subsequent requests are instant
@@ -280,16 +297,19 @@ Apply this to all API calls in your frontend.
 ### Solutions:
 
 **Option A: Accept it** (Recommended for free tier)
+
 - Good for: Development, testing, personal projects
 - Users might experience a 30-second delay occasionally
 - After first load, everything is fast
 
 **Option B: Keep-alive Service** (Free workaround)
+
 - Use a service like UptimeRobot (free) to ping your API every 5 minutes
 - Keeps your app awake during business hours
 - Setup at: https://uptimerobot.com
 
 **Option C: Upgrade to Paid** ($7/month)
+
 - Always-on, no spin-down
 - 512 MB RAM guaranteed
 - When you're ready for production
@@ -299,23 +319,30 @@ Apply this to all API calls in your frontend.
 ## 🔧 Troubleshooting
 
 ### Issue: "Application failed to start"
+
 **Check:**
+
 1. Logs for Python errors
 2. Ensure `requirements.txt` has all dependencies
 3. Verify `Procfile` exists and is correct
 
 ### Issue: "DisallowedHost"
+
 **Solution:** Add your domain to `ALLOWED_HOSTS` environment variable
 
 ### Issue: Database connection error
+
 **Solution:** Verify `DATABASE_URL` is set correctly (use Internal Database URL)
 
 ### Issue: Static files not loading
-**Solution:** 
+
+**Solution:**
+
 1. Check `whitenoise` is in `requirements.txt`
 2. Run `python manage.py collectstatic` in Shell
 
 ### Issue: CORS errors from frontend
+
 **Solution:** Ensure frontend URL is in `CORS_ALLOWED_ORIGINS`
 
 ---
@@ -332,6 +359,7 @@ Apply this to all API calls in your frontend.
 ### Set Up Monitoring:
 
 Consider adding:
+
 - **Sentry** (free tier) for error tracking
 - **UptimeRobot** (free) for uptime monitoring
 - **New Relic** (free tier) for performance monitoring
@@ -343,6 +371,7 @@ Consider adding:
 ### Make the Most of Free Tier:
 
 1. **Add Loading State** in frontend for cold starts
+
    ```javascript
    if (loading) {
      return <div>Waking up the server... (may take 30 seconds)</div>;
@@ -362,6 +391,7 @@ Consider adding:
 ## 🎓 When to Upgrade
 
 Consider upgrading to paid ($7/month) when:
+
 - ❌ Spin-down delay is annoying users
 - ❌ Need more than 512MB RAM
 - ❌ Traffic increases significantly
@@ -390,6 +420,7 @@ Consider upgrading to paid ($7/month) when:
 ## 🎉 You're Live! (For FREE!)
 
 **Your Production URLs:**
+
 - API: `https://sustainable-shine-api.onrender.com/api/`
 - Admin: `https://sustainable-shine-api.onrender.com/admin/`
 - Custom: `https://api.sustainableshine.com.au/api/` (if configured)
@@ -397,6 +428,7 @@ Consider upgrading to paid ($7/month) when:
 **Cost: $0/month** 💰
 
 **Perfect for:**
+
 - ✅ Development
 - ✅ Testing
 - ✅ MVP/Prototype
@@ -416,4 +448,3 @@ Consider upgrading to paid ($7/month) when:
 ---
 
 Happy deploying! 🚀 Your backend is now live for FREE!
-
