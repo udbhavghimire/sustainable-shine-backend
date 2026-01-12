@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import Booking
-from .serializers import BookingSerializer, BookingListSerializer
+from .serializers import BookingSerializer
 
 
 class BookingViewSet(viewsets.ModelViewSet):
@@ -13,9 +13,12 @@ class BookingViewSet(viewsets.ModelViewSet):
     ViewSet for Booking/Lead management
     
     Endpoints:
-    - GET /api/bookings/ - List all bookings (requires authentication for admin)
+    - GET /api/bookings/ - List all bookings with full details (requires authentication for admin)
     - POST /api/bookings/ - Create new booking (public)
     - GET /api/bookings/{id}/ - Retrieve specific booking
+    - GET /api/bookings/{id}/detailed/ - Get detailed structured booking information
+    - PATCH /api/bookings/{id}/update_status/ - Update booking status
+    - GET /api/bookings/statistics/ - Get booking statistics
     - PUT/PATCH /api/bookings/{id}/ - Update booking
     - DELETE /api/bookings/{id}/ - Delete booking
     """
@@ -35,9 +38,7 @@ class BookingViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
     
     def get_serializer_class(self):
-        """Use simplified serializer for list view"""
-        if self.action == 'list':
-            return BookingListSerializer
+        """Use full serializer with all details"""
         return BookingSerializer
     
     def get_permissions(self):
@@ -88,6 +89,76 @@ class BookingViewSet(viewsets.ModelViewSet):
             'success': True,
             'message': f'Booking status updated to {new_status}',
             'data': serializer.data
+        })
+    
+    @action(detail=True, methods=['get'])
+    def detailed(self, request, pk=None):
+        """Get detailed booking information in a structured format"""
+        booking = self.get_object()
+        
+        # Get human-readable labels
+        service_type_label = dict(Booking.SERVICE_TYPES).get(booking.service_type, booking.service_type)
+        frequency_label = dict(Booking.FREQUENCY_CHOICES).get(booking.frequency, booking.frequency)
+        has_pet_label = dict(Booking.HAS_PET_CHOICES).get(booking.has_pet, booking.has_pet) if booking.has_pet else 'N/A'
+        cleanliness_label = dict(Booking.CLEANLINESS_CHOICES).get(booking.cleanliness_level, booking.cleanliness_level) if booking.cleanliness_level else 'N/A'
+        parking_label = dict(Booking.PARKING_CHOICES).get(booking.parking, booking.parking) if booking.parking else 'N/A'
+        access_label = dict(Booking.ACCESS_CHOICES).get(booking.access, booking.access) if booking.access else 'N/A'
+        flexible_label = dict(Booking.FLEXIBLE_CHOICES).get(booking.flexible_date_time, booking.flexible_date_time) if booking.flexible_date_time else 'N/A'
+        hear_about_label = dict(Booking.HEAR_ABOUT_US_CHOICES).get(booking.hear_about_us, booking.hear_about_us) if booking.hear_about_us else 'N/A'
+        
+        # Structure the response
+        detailed_data = {
+            'id': booking.id,
+            'status': booking.status,
+            'service_details': {
+                'service_type': service_type_label,
+                'frequency': frequency_label,
+                'preferred_date': booking.selected_date,
+            },
+            'customer_information': {
+                'name': booking.full_name,
+                'first_name': booking.first_name,
+                'last_name': booking.last_name,
+                'email': booking.email,
+                'phone': booking.phone,
+                'sms_reminders': booking.sms_reminders,
+            },
+            'property_details': {
+                'address': booking.full_address,
+                'unit_number': booking.unit_number,
+                'street': booking.street,
+                'suburb': booking.suburb,
+                'postcode': booking.postcode,
+                'bedrooms': booking.bedrooms,
+                'bathrooms': booking.bathrooms,
+                'storeys': booking.storey,
+                'laundries': booking.laundry,
+                'kitchen': booking.kitchen,
+                'living_dining': booking.living_dining,
+            },
+            'additional_information': {
+                'has_pet': has_pet_label,
+                'cleanliness_level': cleanliness_label,
+                'parking': parking_label,
+                'access': access_label,
+                'flexible_date_time': flexible_label,
+                'hear_about_us': hear_about_label,
+                'special_notes': booking.special_notes or '',
+            },
+            'add_ons': {
+                'selected': booking.selected_add_ons,
+                'details': booking.add_on_details,
+            },
+            'pricing_details': booking.price_details,
+            'metadata': {
+                'created_at': booking.created_at,
+                'updated_at': booking.updated_at,
+            }
+        }
+        
+        return Response({
+            'success': True,
+            'data': detailed_data
         })
     
     @action(detail=False, methods=['get'])
