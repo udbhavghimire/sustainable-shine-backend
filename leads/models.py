@@ -32,8 +32,8 @@ class Booking(models.Model):
     storey = models.IntegerField(default=1)
     
     # Add-ons (stored as JSON)
-    selected_add_ons = models.JSONField(default=dict, blank=True)
-    add_on_details = models.JSONField(default=dict, blank=True)
+    selected_add_ons = models.JSONField(default=dict, blank=True, null=True)
+    add_on_details = models.JSONField(default=dict, blank=True, null=True)
     
     # Booking date
     selected_date = models.DateField()
@@ -105,7 +105,7 @@ class Booking(models.Model):
     access = models.CharField(max_length=20, choices=ACCESS_CHOICES, blank=True)
     
     # Price details (stored as JSON)
-    price_details = models.JSONField(default=dict, blank=True)
+    price_details = models.JSONField(default=dict, blank=True, null=True)
     
     # Status tracking
     STATUS_CHOICES = [

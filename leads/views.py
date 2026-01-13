@@ -54,20 +54,41 @@ class BookingViewSet(viewsets.ModelViewSet):
     
     def create(self, request, *args, **kwargs):
         """Create new booking/lead"""
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            {
-                'success': True,
-                'message': 'Booking request received successfully!',
-                'data': serializer.data
-            },
-            status=status.HTTP_201_CREATED,
-            headers=headers
-        )
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            
+            headers = self.get_success_headers(serializer.data)
+            return Response(
+                {
+                    'success': True,
+                    'message': 'Booking request received successfully!',
+                    'data': serializer.data
+                },
+                status=status.HTTP_201_CREATED,
+                headers=headers
+            )
+        except Exception as e:
+            # Log the error for debugging
+            import traceback
+            error_detail = {
+                'success': False,
+                'message': 'Failed to create booking',
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }
+            print("Booking creation error:", error_detail)  # This will appear in server logs
+            
+            # Return user-friendly error
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Failed to create booking',
+                    'error': str(e)
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
     
     @action(detail=True, methods=['patch'])
     def update_status(self, request, pk=None):
