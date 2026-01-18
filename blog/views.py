@@ -60,12 +60,15 @@ class BlogPostViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         """
         Allow public read access
-        Require authentication for create, update, delete
+        Allow create, update, delete for now (can be restricted later)
         """
-        if self.action in ['list', 'retrieve']:
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticatedOrReadOnly]
+        # For now, allow all actions without authentication
+        # You can change this to require authentication by uncommenting below:
+        # if self.action in ['list', 'retrieve']:
+        #     permission_classes = [AllowAny]
+        # else:
+        #     permission_classes = [IsAuthenticatedOrReadOnly]
+        permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
     
     def retrieve(self, request, *args, **kwargs):
@@ -84,18 +87,20 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        # Set author to current user if not provided
+        # Set author to current user if authenticated and not provided
         if not serializer.validated_data.get('author') and request.user.is_authenticated:
             serializer.validated_data['author'] = request.user
         
-        self.perform_create(serializer)
+        blog_post = serializer.save()
         
-        headers = self.get_success_headers(serializer.data)
+        # Return full blog post data
+        response_serializer = BlogPostSerializer(blog_post)
+        headers = self.get_success_headers(response_serializer.data)
         return Response(
             {
                 'success': True,
                 'message': 'Blog post created successfully!',
-                'data': serializer.data
+                'data': response_serializer.data
             },
             status=status.HTTP_201_CREATED,
             headers=headers
@@ -140,7 +145,8 @@ class BlogPostViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['patch'])
     def publish(self, request, slug=None):
         """Publish a blog post"""
-        blog_post = self.get_object()
+        # Get the post without status filtering
+        blog_post = BlogPost.objects.get(slug=slug)
         blog_post.status = 'published'
         
         if not blog_post.published_date:
@@ -149,7 +155,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         
         blog_post.save()
         
-        serializer = self.get_serializer(blog_post)
+        serializer = BlogPostSerializer(blog_post)
         return Response({
             'success': True,
             'message': 'Blog post published successfully!',
@@ -159,11 +165,12 @@ class BlogPostViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['patch'])
     def unpublish(self, request, slug=None):
         """Unpublish a blog post"""
-        blog_post = self.get_object()
+        # Get the post without status filtering
+        blog_post = BlogPost.objects.get(slug=slug)
         blog_post.status = 'draft'
         blog_post.save()
         
-        serializer = self.get_serializer(blog_post)
+        serializer = BlogPostSerializer(blog_post)
         return Response({
             'success': True,
             'message': 'Blog post unpublished successfully!',
