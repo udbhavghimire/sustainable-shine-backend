@@ -43,10 +43,10 @@ class BookingViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """
-        Allow public access to create endpoint
-        Require authentication for list, update, delete
+        Allow public access to create and delete endpoints
+        Require authentication for list and update
         """
-        if self.action == 'create':
+        if self.action in ['create', 'destroy']:
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticatedOrReadOnly]
@@ -215,3 +215,38 @@ class BookingViewSet(viewsets.ModelViewSet):
             'service_breakdown': service_counts,
             'recent_bookings_30_days': recent_count,
         })
+    
+    def destroy(self, request, *args, **kwargs):
+        """Delete a booking from the database"""
+        try:
+            # Get the booking instance
+            booking = self.get_object()
+            booking_id = booking.id
+            booking_name = booking.full_name
+            
+            # Delete the booking from database
+            booking.delete()
+            
+            return Response(
+                {
+                    'success': True,
+                    'message': f'Booking #{booking_id} for {booking_name} has been successfully deleted',
+                },
+                status=status.HTTP_200_OK
+            )
+        except Booking.DoesNotExist:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'Booking not found'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': f'Failed to delete booking: {str(e)}'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
