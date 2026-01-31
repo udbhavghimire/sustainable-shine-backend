@@ -8,6 +8,7 @@ class BlogPostSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
     reading_time = serializers.ReadOnlyField()
     tags_list = serializers.SerializerMethodField()
+    featured_image = serializers.SerializerMethodField()
     
     class Meta:
         model = BlogPost
@@ -35,6 +36,15 @@ class BlogPostSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ('slug', 'views', 'created_at', 'updated_at', 'reading_time')
     
+    def get_featured_image(self, obj):
+        """Get absolute URL for featured image"""
+        if obj.featured_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.featured_image.url)
+            return obj.featured_image.url
+        return None
+    
     def get_author_name(self, obj):
         """Get author's full name"""
         if obj.author:
@@ -54,6 +64,7 @@ class BlogPostListSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
     reading_time = serializers.ReadOnlyField()
     tags_list = serializers.SerializerMethodField()
+    featured_image = serializers.SerializerMethodField()
     
     class Meta:
         model = BlogPost
@@ -73,6 +84,15 @@ class BlogPostListSerializer(serializers.ModelSerializer):
             'reading_time',
             'created_at',
         ]
+    
+    def get_featured_image(self, obj):
+        """Get absolute URL for featured image"""
+        if obj.featured_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.featured_image.url)
+            return obj.featured_image.url
+        return None
     
     def get_author_name(self, obj):
         """Get author's full name"""

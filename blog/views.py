@@ -43,6 +43,12 @@ class BlogPostViewSet(viewsets.ModelViewSet):
             return BlogPostCreateSerializer
         return BlogPostSerializer
     
+    def get_serializer_context(self):
+        """Add request to serializer context for building absolute URLs"""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+    
     def get_queryset(self):
         """
         Filter queryset based on user authentication
@@ -94,7 +100,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         blog_post = serializer.save()
         
         # Return full blog post data
-        response_serializer = BlogPostSerializer(blog_post)
+        response_serializer = BlogPostSerializer(blog_post, context={'request': request})
         headers = self.get_success_headers(response_serializer.data)
         return Response(
             {
@@ -110,7 +116,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
     def featured(self, request):
         """Get featured blog posts"""
         featured_posts = self.get_queryset().filter(featured=True, status='published')[:5]
-        serializer = BlogPostListSerializer(featured_posts, many=True)
+        serializer = BlogPostListSerializer(featured_posts, many=True, context={'request': request})
         return Response(serializer.data)
     
     @action(detail=False, methods=['get'])
@@ -132,14 +138,14 @@ class BlogPostViewSet(viewsets.ModelViewSet):
     def popular(self, request):
         """Get most popular blog posts (by views)"""
         popular_posts = self.get_queryset().filter(status='published').order_by('-views')[:10]
-        serializer = BlogPostListSerializer(popular_posts, many=True)
+        serializer = BlogPostListSerializer(popular_posts, many=True, context={'request': request})
         return Response(serializer.data)
     
     @action(detail=False, methods=['get'])
     def recent(self, request):
         """Get recent blog posts"""
         recent_posts = self.get_queryset().filter(status='published').order_by('-published_date')[:10]
-        serializer = BlogPostListSerializer(recent_posts, many=True)
+        serializer = BlogPostListSerializer(recent_posts, many=True, context={'request': request})
         return Response(serializer.data)
     
     @action(detail=True, methods=['patch'])
@@ -155,7 +161,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         
         blog_post.save()
         
-        serializer = BlogPostSerializer(blog_post)
+        serializer = BlogPostSerializer(blog_post, context={'request': request})
         return Response({
             'success': True,
             'message': 'Blog post published successfully!',
@@ -170,7 +176,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         blog_post.status = 'draft'
         blog_post.save()
         
-        serializer = BlogPostSerializer(blog_post)
+        serializer = BlogPostSerializer(blog_post, context={'request': request})
         return Response({
             'success': True,
             'message': 'Blog post unpublished successfully!',
