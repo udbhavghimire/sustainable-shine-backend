@@ -43,10 +43,10 @@ class BookingViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """
-        Allow public access to create and delete endpoints
-        Require authentication for list and update
+        Allow public access to create, delete, and update_status endpoints
+        Require authentication for list and full update
         """
-        if self.action in ['create', 'destroy']:
+        if self.action in ['create', 'destroy', 'update_status']:
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticatedOrReadOnly]
