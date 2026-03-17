@@ -72,9 +72,6 @@ python manage.py collectstatic --noinput
 echo "🔄 Restarting Gunicorn service..."
 sudo systemctl restart gunicorn
 
-echo "🔄 Reloading Nginx..."
-sudo systemctl reload nginx
-
 echo "✅ Checking service status..."
 sudo systemctl status gunicorn --no-pager -l
 
