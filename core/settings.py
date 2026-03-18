@@ -186,6 +186,13 @@ CORS_ALLOWED_ORIGINS = config(
 
 CORS_ALLOW_CREDENTIALS = True
 
+# CSRF Configuration for CORS
+CSRF_TRUSTED_ORIGINS = [
+    'https://sustainableshine.com.au',
+    'https://www.sustainableshine.com.au',
+    'https://api.sustainableshine.com.au',
+]
+
 CORS_ALLOW_METHODS = [
     "DELETE",
     "GET",
