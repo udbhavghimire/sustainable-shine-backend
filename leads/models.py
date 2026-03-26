@@ -35,8 +35,9 @@ class Booking(models.Model):
     selected_add_ons = models.JSONField(default=dict, blank=True, null=True)
     add_on_details = models.JSONField(default=dict, blank=True, null=True)
     
-    # Booking date
+    # Booking date and time
     selected_date = models.DateField()
+    selected_time = models.TimeField(null=True, blank=True)
     
     # Customer details
     first_name = models.CharField(max_length=100)

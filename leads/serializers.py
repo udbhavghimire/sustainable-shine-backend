@@ -93,6 +93,7 @@ class BookingListSerializer(serializers.ModelSerializer):
             'service_type',
             'frequency',
             'selected_date',
+            'selected_time',
             'status',
             'total_price',
             'full_address',

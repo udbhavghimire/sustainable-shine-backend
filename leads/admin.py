@@ -14,6 +14,7 @@ class BookingAdmin(admin.ModelAdmin):
         'service_type',
         'frequency',
         'selected_date',
+        'selected_time',
         'status',
         'total_price',
         'created_at',
@@ -52,6 +53,7 @@ class BookingAdmin(admin.ModelAdmin):
                 'service_type',
                 'frequency',
                 'selected_date',
+                'selected_time',
                 'status',
             )
         }),
